@@ -1,129 +1,129 @@
-import React, { Component } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import Paper from '@material-ui/core/Paper'
-import Table from '@material-ui/core/Table'
-import TableBody from '@material-ui/core/TableBody'
-import TableCell from '@material-ui/core/TableCell'
-import TableContainer from '@material-ui/core/TableContainer'
-import TableHead from '@material-ui/core/TableHead'
-import TablePagination from '@material-ui/core/TablePagination'
-import TableRow from '@material-ui/core/TableRow'
-import { withStyles } from '@material-ui/core/styles'
-import Button from '@material-ui/core/Button'
-import Land from '../abis/LandRegistry.json'
-import Grid from '@material-ui/core/Grid'
-import { Card } from '@material-ui/core'
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogContentText from '@material-ui/core/DialogContentText'
-import DialogTitle from '@material-ui/core/DialogTitle'
-import Slide from '@material-ui/core/Slide'
-import axios from 'axios'
+import React, { Component } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import Paper from "@material-ui/core/Paper";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TablePagination from "@material-ui/core/TablePagination";
+import TableRow from "@material-ui/core/TableRow";
+import { withStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import Land from "../abis/LandRegistry.json";
+import Grid from "@material-ui/core/Grid";
+import { Card } from "@material-ui/core";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Slide from "@material-ui/core/Slide";
+import axios from "axios";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />
-})
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const columns = [
-  { id: 'property', label: 'Property ID', minWidth: 100 },
-  { id: 'name', label: 'Full Name', minWidth: 100 },
+  { id: "property", label: "Property ID", minWidth: 100 },
+  { id: "name", label: "Full Name", minWidth: 100 },
 
   {
-    id: 'laddress',
-    label: 'Land Details',
+    id: "laddress",
+    label: "Land Details",
     minWidth: 170,
   },
 
   {
-    id: 'lstate',
-    label: 'State',
+    id: "lstate",
+    label: "State",
     minWidth: 100,
   },
   {
-    id: 'lcity',
-    label: 'City',
+    id: "lcity",
+    label: "City",
     minWidth: 100,
   },
 
   {
-    id: 'lamount',
-    label: 'Total Amount (in Rs)',
+    id: "lamount",
+    label: "Total Amount (in Rs)",
     minWidth: 100,
   },
   {
-    id: 'document',
-    label: 'Documents',
+    id: "document",
+    label: "Documents",
     minWidth: 100,
   },
   {
-    id: 'images',
-    label: 'Land Images',
+    id: "images",
+    label: "Land Images",
     minWidth: 100,
   },
   {
-    id: 'isGovtApproved',
-    label: 'Status of Land Approval (by the Govt.)',
+    id: "isGovtApproved",
+    label: "Status of Land Approval (by the Govt.)",
     minWidth: 100,
   },
   {
-    id: 'isAvailable',
-    label: 'Land Availability Status',
+    id: "isAvailable",
+    label: "Land Availability Status",
     minWidth: 100,
   },
   {
-    id: 'requester',
-    label: 'Requestor Info',
+    id: "requester",
+    label: "Requestor Info",
     minWidth: 100,
   },
-]
+];
 
 const styles = (theme) => ({
   root: {
-    width: '100%',
+    width: "100%",
   },
-})
+});
 
 class table extends Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       assetList: [],
       isLoading: true,
       open: false,
       open1: false,
       images: [],
-    }
+    };
   }
   componentDidMount = async () => {
-    const web3 = window.web3
-    const accounts = await web3.eth.getAccounts()
-    await window.localStorage.setItem('web3account', accounts[0])
-    this.setState({ account: accounts[0] })
-    const networkId = await web3.eth.net.getId()
-    const LandData = Land.networks[networkId]
+    const web3 = window.web3;
+    const accounts = await web3.eth.getAccounts();
+    await window.localStorage.setItem("web3account", accounts[0]);
+    this.setState({ account: accounts[0] });
+    const networkId = await web3.eth.net.getId();
+    const LandData = Land.networks[networkId];
     if (LandData) {
-      const landList = new web3.eth.Contract(Land.abi, LandData.address)
-      this.setState({ landList })
+      const landList = new web3.eth.Contract(Land.abi, LandData.address);
+      this.setState({ landList });
     } else {
-      window.alert('Token contract not deployed to detected network.')
+      window.alert("Token contract not deployed to detected network.");
     }
-  }
+  };
 
   handleAccept = async (id) => {
     await this.state.landList.methods.makeAvailable(id).send({
       from: this.state.account,
       gas: 1000000,
-    })
+    });
 
-    window.location.reload()
-  }
+    window.location.reload();
+  };
   handleProcessRequest = async (id, n, address, name) => {
     await this.state.landList.methods.processRequest(id, n).send({
       from: this.state.account,
       gas: 1000000,
-    })
-    const user = await this.state.landList.methods.getUser(address).call()
+    });
+    const user = await this.state.landList.methods.getUser(address).call();
 
     if (user) {
       this.setState({
@@ -134,7 +134,7 @@ class table extends Component {
         ucode: user[4],
         ucity: user[5],
         exist: user[6],
-      })
+      });
     }
     let data = {
       lemail: this.state.uemail,
@@ -146,23 +146,23 @@ class table extends Component {
         n == 3
           ? `${name} has accepted your requested. Please check your account.`
           : `${name} has rejected your requested. Please check your account.`,
-    }
+    };
 
-    console.log(data)
+    console.log(data);
     await axios
-      .post('http://localhost:3001/send_mail', data)
+      .post("http://localhost:3001/send_mail", data)
       .then((response) => {
         if (response.status == 200) {
-          alert('Message Sent.')
+          alert("Message Sent.");
         } else {
-          alert('Message failed to send.')
+          alert("Message failed to send.");
         }
-      })
-    window.location.reload()
-  }
+      });
+    window.location.reload();
+  };
   handleRequesterInfo = async (address) => {
-    this.setState({ open: true })
-    const user = await this.state.landList.methods.getUser(address).call()
+    this.setState({ open: true });
+    const user = await this.state.landList.methods.getUser(address).call();
 
     if (user) {
       this.setState({
@@ -173,27 +173,27 @@ class table extends Component {
         ucode: user[4],
         ucity: user[5],
         exist: user[6],
-      })
+      });
     }
-  }
+  };
   handleClose = () => {
-    this.setState({ open: false })
-  }
+    this.setState({ open: false });
+  };
   handleViewImages = async (images) => {
-    this.setState({ open1: true })
+    this.setState({ open1: true });
 
     if (images) {
       this.setState({
         images: images,
-      })
+      });
     }
-  }
+  };
   handleClose1 = () => {
-    this.setState({ open1: false })
-  }
+    this.setState({ open1: false });
+  };
 
   render() {
-    const { classes, assetList } = this.props
+    const { classes, assetList } = this.props;
     return (
       <Paper className={classes.root}>
         {console.log(assetList)}
@@ -217,20 +217,20 @@ class table extends Component {
                 return (
                   <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                     {columns.map((column) => {
-                      const value = row[column.id]
+                      const value = row[column.id];
                       return (
                         <TableCell key={column.id} align={column.align}>
-                          {column.id == 'isAvailable' &&
-                          value == 'GovtApproved' ? (
+                          {column.id === "isAvailable" &&
+                          value === "GovtApproved" ? (
                             <Button
                               variant="contained"
                               color="primary"
-                              onClick={() => this.handleAccept(row['property'])}
+                              onClick={() => this.handleAccept(row["property"])}
                             >
                               Make Available
                             </Button>
-                          ) : column.id == 'isAvailable' &&
-                            value == 'Pending' ? (
+                          ) : column.id === "isAvailable" &&
+                            value === "Pending" ? (
                             <Grid container spacing={2}>
                               <Grid item>
                                 <Button
@@ -238,10 +238,10 @@ class table extends Component {
                                   color="primary"
                                   onClick={() =>
                                     this.handleProcessRequest(
-                                      row['property'],
+                                      row["property"],
                                       3,
-                                      row['requester'],
-                                      row['name'],
+                                      row["requester"],
+                                      row["name"]
                                     )
                                   }
                                 >
@@ -254,10 +254,10 @@ class table extends Component {
                                   color="secondary"
                                   onClick={() =>
                                     this.handleProcessRequest(
-                                      row['property'],
+                                      row["property"],
                                       2,
-                                      row['requester'],
-                                      row['name'],
+                                      row["requester"],
+                                      row["name"]
                                     )
                                   }
                                 >
@@ -265,32 +265,32 @@ class table extends Component {
                                 </Button>
                               </Grid>
                             </Grid>
-                          ) : column.id == 'requester' &&
+                          ) : column.id === "requester" &&
                             value !=
-                              '0x0000000000000000000000000000000000000000' ? (
+                              "0x0000000000000000000000000000000000000000" ? (
                             <Button
                               variant="contained"
                               color="primary"
                               onClick={() =>
-                                this.handleRequesterInfo(row['requester'])
+                                this.handleRequesterInfo(row["requester"])
                               }
                             >
                               View Request
                             </Button>
-                          ) : column.id == 'requester' &&
-                            value ==
-                              '0x0000000000000000000000000000000000000000' ? (
+                          ) : column.id === "requester" &&
+                            value ===
+                              "0x0000000000000000000000000000000000000000" ? (
                             <span>No Requestor</span>
-                          ) : column.id == 'document' ? (
-                            <a href={row['document']} download>
+                          ) : column.id === "document" ? (
+                            <a href={row["document"]} download>
                               Download Document
                             </a>
-                          ) : column.id == 'images' ? (
+                          ) : column.id === "images" ? (
                             <Button
                               variant="contained"
                               color="primary"
                               onClick={() =>
-                                this.handleViewImages(row['images'])
+                                this.handleViewImages(row["images"])
                               }
                             >
                               View Images
@@ -308,15 +308,15 @@ class table extends Component {
                           >
                             <DialogTitle
                               id="alert-dialog-slide-title"
-                              style={{ textAlign: 'center' }}
+                              style={{ textAlign: "center" }}
                             >
-                              {'Requestor Details'}
+                              {"Requestor Details"}
                             </DialogTitle>
                             <DialogContent>
                               <DialogContentText id="alert-dialog-slide-description">
                                 <b>Name:</b> {this.state.uname}
                                 <br />
-                                <b>Address:</b> {row['requester']}
+                                <b>Address:</b> {row["requester"]}
                                 <br />
                                 <b>Contact Number:</b> {this.state.ucontact}
                                 <br />
@@ -346,9 +346,9 @@ class table extends Component {
                           >
                             <DialogTitle
                               id="alert-dialog-slide-title"
-                              style={{ textAlign: 'center' }}
+                              style={{ textAlign: "center" }}
                             >
-                              {'View Images'}
+                              {"View Images"}
                             </DialogTitle>
                             <DialogContent>
                               <DialogContentText id="alert-dialog-slide-description">
@@ -356,9 +356,9 @@ class table extends Component {
                                   <img
                                     src={image}
                                     style={{
-                                      height: '300px',
-                                      width: '400px',
-                                      margin: '10px',
+                                      height: "300px",
+                                      width: "400px",
+                                      margin: "10px",
                                     }}
                                   />
                                 ))}
@@ -374,16 +374,16 @@ class table extends Component {
                             </DialogActions>
                           </Dialog>
                         </TableCell>
-                      )
+                      );
                     })}
                   </TableRow>
-                )
+                );
               })}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
-    )
+    );
   }
 }
-export default withStyles(styles)(table)
+export default withStyles(styles)(table);

@@ -1,15 +1,15 @@
-import React, { Component } from 'react'
-import { withStyles } from '@material-ui/core/styles'
-import AppBar from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar'
-import IconButton from '@material-ui/core/IconButton'
-import Typography from '@material-ui/core/Typography'
-import MenuItem from '@material-ui/core/MenuItem'
-import Menu from '@material-ui/core/Menu'
-import AccountCircle from '@material-ui/icons/AccountCircle'
-import MoreIcon from '@material-ui/icons/MoreVert'
-import Land from '../abis/LandRegistry.json'
-import Button from '@material-ui/core/Button'
+import React, { Component } from "react";
+import { withStyles } from "@material-ui/core/styles";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import IconButton from "@material-ui/core/IconButton";
+import Typography from "@material-ui/core/Typography";
+import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@material-ui/core/Menu";
+import AccountCircle from "@material-ui/icons/AccountCircle";
+import MoreIcon from "@material-ui/icons/MoreVert";
+import Land from "../abis/LandRegistry.json";
+import Button from "@material-ui/core/Button";
 
 const styles = (theme) => ({
   grow: {
@@ -19,68 +19,68 @@ const styles = (theme) => ({
     marginRight: theme.spacing(2),
   },
   title: {
-    display: 'flex',
-    [theme.breakpoints.up('sm')]: {
-      display: 'block',
+    display: "flex",
+    [theme.breakpoints.up("sm")]: {
+      display: "block",
     },
   },
   sectionDesktop: {
-    display: 'none',
-    [theme.breakpoints.up('md')]: {
-      display: 'flex',
+    display: "none",
+    [theme.breakpoints.up("md")]: {
+      display: "flex",
     },
   },
   sectionMobile: {
-    display: 'flex',
-    [theme.breakpoints.up('md')]: {
-      display: 'none',
+    display: "flex",
+    [theme.breakpoints.up("md")]: {
+      display: "none",
     },
   },
-})
+});
 
 class Header extends Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       anchorEl: false,
       mobileMoreAnchorEl: false,
       authenticated: false,
-    }
+    };
   }
   componentDidMount = async () => {
-    const web3 = window.web3
-    const acc = await window.localStorage.getItem('web3account')
-    this.setState({ account: acc })
+    const web3 = window.web3;
+    const acc = await window.localStorage.getItem("web3account");
+    this.setState({ account: acc });
     // console.log(acc)
-    const networkId = await web3.eth.net.getId()
-    const LandData = Land.networks[networkId]
+    const networkId = await web3.eth.net.getId();
+    const LandData = Land.networks[networkId];
     if (LandData) {
-      const landList = new web3.eth.Contract(Land.abi, LandData.address)
-      this.setState({ landList })
+      const landList = new web3.eth.Contract(Land.abi, LandData.address);
+      this.setState({ landList });
     } else {
-      window.alert('Token contract not deployed to detected network.')
+      window.alert("Token contract not deployed to detected network.");
     }
-    if (window.localStorage.getItem('authenticated') === 'true')
-      this.setState({ authenticated: true })
-  }
+    if (window.localStorage.getItem("authenticated") === "true")
+      this.setState({ authenticated: true });
+  };
   handleMobileMenuClose = () => {
-    this.setState({ mobileMoreAnchorEl: false })
-  }
+    this.setState({ mobileMoreAnchorEl: false });
+  };
 
   handleMobileMenuOpen = (event) => {
-    this.setState({ mobileMoreAnchorEl: true })
-  }
+    this.setState({ mobileMoreAnchorEl: true });
+  };
   render() {
-    const { classes } = this.props
-    const mobileMenuId = 'primary-search-account-menu-mobile'
+    const { classes } = this.props;
+    const mobileMenuId = "primary-search-account-menu-mobile";
 
     const renderMobileMenu = (
       <Menu
         anchorEl={this.state.mobileMoreAnchorEl}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
         id={mobileMenuId}
         keepMounted
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         open={this.state.mobileMoreAnchorEl}
         onClose={this.handleMobileMenuClose}
       >
@@ -88,8 +88,8 @@ class Header extends Component {
           <Button
             color="inherit"
             onClick={() => {
-              window.localStorage.setItem('authenticated', false)
-              window.location = '/login'
+              window.localStorage.setItem("authenticated", false);
+              window.location = "/login";
             }}
           >
             Logout
@@ -99,7 +99,7 @@ class Header extends Component {
           <Button
             color="inherit"
             onClick={() => {
-              window.location = '/login'
+              window.location = "/login";
             }}
           >
             Login
@@ -109,7 +109,7 @@ class Header extends Component {
           <Button
             color="inherit"
             onClick={() => {
-              window.location = '/signup'
+              window.location = "/signup";
             }}
           >
             SignUp
@@ -119,14 +119,14 @@ class Header extends Component {
           <Button
             color="inherit"
             onClick={() => {
-              window.location = '/govt_login'
+              window.location = "/govt_login";
             }}
           >
             Government Login
           </Button>
         </MenuItem>
       </Menu>
-    )
+    );
 
     return (
       <div>
@@ -153,7 +153,7 @@ class Header extends Component {
                   <a
                     className="smoothscroll"
                     onClick={() => {
-                      window.location = '/'
+                      window.location = "/";
                     }}
                   >
                     Home
@@ -165,7 +165,7 @@ class Header extends Component {
                       <a
                         className="smoothscroll"
                         onClick={() => {
-                          window.location = '/login'
+                          window.location = "/login";
                         }}
                       >
                         Login
@@ -175,7 +175,7 @@ class Header extends Component {
                       <a
                         className="smoothscroll"
                         onClick={() => {
-                          window.location = '/signup'
+                          window.location = "/signup";
                         }}
                       >
                         Sign Up
@@ -185,10 +185,10 @@ class Header extends Component {
                       <a
                         className="smoothscroll"
                         onClick={() => {
-                          window.location = '/govt_login'
+                          window.location = "/govt_login";
                         }}
                       >
-                        Government Login
+                        Official Login
                       </a>
                     </li>
                   </div>
@@ -200,7 +200,7 @@ class Header extends Component {
                       <a
                         className="smoothscroll"
                         onClick={() => {
-                          window.location = '/dashboard'
+                          window.location = "/dashboard";
                         }}
                       >
                         Dashboard
@@ -210,7 +210,7 @@ class Header extends Component {
                       <a
                         className="smoothscroll"
                         onClick={() => {
-                          window.location = '/profile'
+                          window.location = "/profile";
                         }}
                       >
                         Profile
@@ -220,8 +220,8 @@ class Header extends Component {
                       <a
                         className="smoothscroll"
                         onClick={() => {
-                          window.localStorage.setItem('authenticated', false)
-                          window.location = '/login'
+                          window.localStorage.setItem("authenticated", false);
+                          window.location = "/login";
                         }}
                       >
                         Logout
@@ -233,7 +233,7 @@ class Header extends Component {
                   <a
                     className="smoothscroll"
                     onClick={() => {
-                      window.location = '/guide'
+                      window.location = "/guide";
                     }}
                   >
                     FAQ
@@ -328,8 +328,8 @@ class Header extends Component {
           {/* {renderMenu} */}
         </div>
       </div>
-    )
+    );
   }
 }
 
-export default withStyles(styles)(Header)
+export default withStyles(styles)(Header);

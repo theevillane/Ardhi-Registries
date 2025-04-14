@@ -1,8 +1,8 @@
 module.exports = {
-  email: "EMAIL",
-  password: "PASSWORD",
-  NEXMO_API_KEY: "API_KEY",
-  NEXMO_API_SECRET: "SECRET_KEY",
-  NEXMO_FROM_NUMBER: "NUMBER",
-  MongoURI: `ENTER_MONGOURI`
-}
+  email: "ryantibbs47@gmail.com",
+  password: "Owandho@254",
+  NEXMO_API_KEY: "A1ea580e9",
+  NEXMO_API_SECRET: "V4RaMuglMuk5q0Ma",
+  NEXMO_FROM_NUMBER: "+254758173305",
+  MongoURI: "mongodb://localhost:27017//Users",
+};

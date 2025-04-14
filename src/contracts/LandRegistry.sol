@@ -30,7 +30,12 @@ contract LandRegistry {
     address[] userarr;
     uint256[] assets;
     address owner;
-    enum reqStatus {Default, Pending, Rejected, Approved}
+    enum reqStatus {
+        Default,
+        Pending,
+        Rejected,
+        Approved
+    }
 
     constructor() public {
         owner = msg.sender;
@@ -66,7 +71,9 @@ contract LandRegistry {
         return true;
     }
 
-    function getUser(address uid)
+    function getUser(
+        address uid
+    )
         public
         view
         returns (
@@ -116,11 +123,10 @@ contract LandRegistry {
         return true;
     }
 
-    function computeId(string memory _laddress, string memory _lamount)
-        public
-        view
-        returns (uint256)
-    {
+    function computeId(
+        string memory _laddress,
+        string memory _lamount
+    ) public pure returns (uint256) {
         return
             uint256(keccak256(abi.encodePacked(_laddress, _lamount))) %
             10000000000000;
@@ -134,7 +140,9 @@ contract LandRegistry {
         return assets;
     }
 
-    function landInfoOwner(uint256 id)
+    function landInfoOwner(
+        uint256 id
+    )
         public
         view
         returns (
@@ -209,16 +217,19 @@ contract LandRegistry {
         uint256 index = findId(id, previousOwner);
         profile[previousOwner].assetList[index] = profile[previousOwner]
             .assetList[profile[previousOwner].assetList.length - 1];
-        delete profile[previousOwner].assetList[profile[previousOwner]
-            .assetList
-            .length - 1];
+        delete profile[previousOwner].assetList[
+            profile[previousOwner].assetList.length - 1
+        ];
         profile[previousOwner].assetList.length--;
     }
 
-    function findId(uint256 id, address user) public view returns (uint256) {
+    function findId(
+        uint256 id,
+        address userAddress
+    ) public view returns (uint256) {
         uint256 i;
-        for (i = 0; i < profile[user].assetList.length; i++) {
-            if (profile[user].assetList[i] == id) return i;
+        for (i = 0; i < profile[userAddress].assetList.length; i++) {
+            if (profile[userAddress].assetList[i] == id) return i;
         }
         return i;
     }
