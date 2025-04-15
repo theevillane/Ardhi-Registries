@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Land Registry Application using Ethereum Blockchain
 
 ![](https://github.com/1209simran/Land-Registry-Application/blob/master/src/images/home.png?raw=true)
@@ -106,3 +107,6 @@ This step has several stages involved. There is no intermediary in between, and 
 The whole process is conducted in the form of the smart contract, which ensures that the process is immutable, secured and digitized. No one in between can tamper the data, and authenticity is maintained throughout the process. There is no human error involved. Paperwork will be reduced, and most importantly, everything will become transparent. Chances of fraud cases will get reduced. The public ledger can be used in case there is any doubt regarding the land ownership claim. The documents are digitally signed, which leads to the transfer of land title upon payment in cryptocurrency.
 
 **In case of any query, please feel free to contact me.**
+=======
+# Ardhi-Registries
+>>>>>>> 045b85c3cbba61b4dba011c1d19b205a2b1564c5
