@@ -228,7 +228,7 @@ class Dashboard extends Component {
                   aria-label="full width tabs example"
                 >
                   <Tab label="My Properties" {...a11yProps(0)} />
-                  <Tab label="Available Properties" {...a11yProps(1)} />
+                  <Tab label="Available Property" {...a11yProps(1)} />
                   <Tab label="Regsiter Land" {...a11yProps(2)} />
                 </Tabs>
               </AppBar>
