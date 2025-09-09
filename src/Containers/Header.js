@@ -1,335 +1,295 @@
-import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import MenuItem from "@material-ui/core/MenuItem";
-import Menu from "@material-ui/core/Menu";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import MoreIcon from "@material-ui/icons/MoreVert";
-import Land from "../abis/LandRegistry.json";
-import Button from "@material-ui/core/Button";
+import React, { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Box,
+  Avatar,
+  useMediaQuery,
+  useTheme,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+} from '@material-ui/core';
+import {
+  Menu as MenuIcon,
+  AccountCircle,
+  Dashboard,
+  Home,
+  Login,
+  PersonAdd,
+  ExitToApp,
+  AdminPanelSettings,
+} from '@material-ui/icons';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../App';
 
-const styles = (theme) => ({
-  grow: {
-    flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    display: "flex",
-    [theme.breakpoints.up("sm")]: {
-      display: "block",
-    },
-  },
-  sectionDesktop: {
-    display: "none",
-    [theme.breakpoints.up("md")]: {
-      display: "flex",
-    },
-  },
-  sectionMobile: {
-    display: "flex",
-    [theme.breakpoints.up("md")]: {
-      display: "none",
-    },
-  },
-});
+function Header() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
+  const { isAuthenticated, user, logout } = useAuth();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-class Header extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      anchorEl: false,
-      mobileMoreAnchorEl: false,
-      authenticated: false,
-    };
-  }
-  componentDidMount = async () => {
-    const web3 = window.web3;
-    const acc = await window.localStorage.getItem("web3account");
-    this.setState({ account: acc });
-    // console.log(acc)
-    const networkId = await web3.eth.net.getId();
-    const LandData = Land.networks[networkId];
-    if (LandData) {
-      const landList = new web3.eth.Contract(Land.abi, LandData.address);
-      this.setState({ landList });
-    } else {
-      window.alert("Token contract not deployed to detected network.");
-    }
-    if (window.localStorage.getItem("authenticated") === "true")
-      this.setState({ authenticated: true });
-  };
-  handleMobileMenuClose = () => {
-    this.setState({ mobileMoreAnchorEl: false });
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  handleMobileMenuOpen = (event) => {
-    this.setState({ mobileMoreAnchorEl: true });
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
-  render() {
-    const { classes } = this.props;
-    const mobileMenuId = "primary-search-account-menu-mobile";
 
-    const renderMobileMenu = (
-      <Menu
-        anchorEl={this.state.mobileMoreAnchorEl}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        id={mobileMenuId}
-        keepMounted
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        open={this.state.mobileMoreAnchorEl}
-        onClose={this.handleMobileMenuClose}
-      >
-        <MenuItem>
-          <Button
+  const handleLogout = () => {
+    logout();
+    handleMenuClose();
+    navigate('/');
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+    handleMenuClose();
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  const menuItems = [
+    { label: 'Home', path: '/', icon: <Home /> },
+    { label: 'Guide', path: '/guide', icon: <Dashboard /> },
+  ];
+
+  const authMenuItems = [
+    { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
+    { label: 'Profile', path: '/profile', icon: <AccountCircle /> },
+    { label: 'Register Land', path: '/registration_form', icon: <PersonAdd /> },
+  ];
+
+  const govtMenuItems = [
+    { label: 'Government Dashboard', path: '/dashboard_govt', icon: <AdminPanelSettings /> },
+  ];
+
+  const renderDesktopMenu = () => (
+    <Box display="flex" alignItems="center" gap={2}>
+      {menuItems.map((item) => (
+        <Button
+          key={item.path}
+          color="inherit"
+          onClick={() => handleNavigation(item.path)}
+          style={{
+            backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+          }}
+        >
+          {item.label}
+        </Button>
+      ))}
+
+      {isAuthenticated ? (
+        <>
+          {authMenuItems.map((item) => (
+            <Button
+              key={item.path}
+              color="inherit"
+              onClick={() => handleNavigation(item.path)}
+              style={{
+                backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+              }}
+            >
+              {item.label}
+            </Button>
+          ))}
+
+          {user?.role === 'government' && govtMenuItems.map((item) => (
+            <Button
+              key={item.path}
+              color="inherit"
+              onClick={() => handleNavigation(item.path)}
+              style={{
+                backgroundColor: isActive(item.path) ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+              }}
+            >
+              {item.label}
+            </Button>
+          ))}
+
+          <IconButton
             color="inherit"
-            onClick={() => {
-              window.localStorage.setItem("authenticated", false);
-              window.location = "/login";
+            onClick={handleMenuOpen}
+            aria-label="account menu"
+          >
+            <Avatar style={{ width: 32, height: 32, backgroundColor: theme.palette.secondary.main }}>
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </Avatar>
+          </IconButton>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
             }}
           >
-            Logout
-          </Button>
-        </MenuItem>
-        <MenuItem>
+            <MenuItem onClick={() => handleNavigation('/profile')}>
+              <ListItemIcon>
+                <AccountCircle />
+              </ListItemIcon>
+              Profile
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon>
+                <ExitToApp />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </Menu>
+        </>
+      ) : (
+        <>
           <Button
             color="inherit"
-            onClick={() => {
-              window.location = "/login";
-            }}
+            onClick={() => handleNavigation('/login')}
+            startIcon={<Login />}
           >
             Login
           </Button>
-        </MenuItem>
-        <MenuItem>
           <Button
             color="inherit"
-            onClick={() => {
-              window.location = "/signup";
-            }}
+            onClick={() => handleNavigation('/signup')}
+            startIcon={<PersonAdd />}
+            variant="outlined"
+            style={{ marginLeft: 8 }}
           >
-            SignUp
+            Sign Up
           </Button>
-        </MenuItem>
-        <MenuItem>
-          <Button
-            color="inherit"
-            onClick={() => {
-              window.location = "/govt_login";
-            }}
-          >
-            Government Login
-          </Button>
-        </MenuItem>
-      </Menu>
-    );
+        </>
+      )}
+    </Box>
+  );
 
-    return (
-      <div>
-        <div className={classes.grow}>
-          {/* {console.log(this.state.authenticated)} */}
-          <header id="header">
-            <nav id="nav-wrap">
-              <a
-                className="mobile-btn"
-                href="#nav-wrap"
-                title="Show navigation"
-              >
-                Show navigation
-              </a>
-              <a
-                className="mobile-btn"
-                href="#nav-wrap"
-                title="Hide navigation"
-              >
-                Hide navigation
-              </a>
-              <ul id="nav" className="nav">
-                <li>
-                  <a
-                    className="smoothscroll"
-                    onClick={() => {
-                      window.location = "/";
-                    }}
-                  >
-                    Home
-                  </a>
-                </li>
-                {this.state.authenticated == false && (
-                  <div>
-                    <li>
-                      <a
-                        className="smoothscroll"
-                        onClick={() => {
-                          window.location = "/login";
-                        }}
-                      >
-                        Login
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        className="smoothscroll"
-                        onClick={() => {
-                          window.location = "/signup";
-                        }}
-                      >
-                        Sign Up
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        className="smoothscroll"
-                        onClick={() => {
-                          window.location = "/govt_login";
-                        }}
-                      >
-                        Official Login
-                      </a>
-                    </li>
-                  </div>
-                )}
+  const renderMobileMenu = () => (
+    <Drawer
+      anchor="right"
+      open={mobileMenuOpen}
+      onClose={() => setMobileMenuOpen(false)}
+    >
+      <Box width={250} padding={2}>
+        <Typography variant="h6" gutterBottom>
+          Menu
+        </Typography>
+        
+        <List>
+          {menuItems.map((item) => (
+            <ListItem
+              key={item.path}
+              button
+              onClick={() => handleNavigation(item.path)}
+              selected={isActive(item.path)}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.label} />
+            </ListItem>
+          ))}
 
-                {this.state.authenticated == true && (
-                  <div>
-                    <li>
-                      <a
-                        className="smoothscroll"
-                        onClick={() => {
-                          window.location = "/dashboard";
-                        }}
-                      >
-                        Dashboard
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        className="smoothscroll"
-                        onClick={() => {
-                          window.location = "/profile";
-                        }}
-                      >
-                        Profile
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        className="smoothscroll"
-                        onClick={() => {
-                          window.localStorage.setItem("authenticated", false);
-                          window.location = "/login";
-                        }}
-                      >
-                        Logout
-                      </a>
-                    </li>
-                  </div>
-                )}
-                <li>
-                  <a
-                    className="smoothscroll"
-                    onClick={() => {
-                      window.location = "/guide";
-                    }}
-                  >
-                    FAQ
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </header>
-          {/* <AppBar position="static">
-            <Toolbar>
-              <Typography className={classes.title} variant="h6" noWrap>
-                Land Registry Application
-              </Typography>
-
-              <div className={classes.grow} />
-              <div className={classes.sectionDesktop}>
-                <Button color="inherit">Home</Button>
-
-                {this.state.authenticated == false && (
-                  <div>
-                    <Button
-                      color="inherit"
-                      onClick={() => {
-                        window.location = '/login'
-                      }}
-                    >
-                      Login
-                    </Button>
-                    <Button
-                      color="inherit"
-                      onClick={() => {
-                        window.location = '/signup'
-                      }}
-                    >
-                      SignUp
-                    </Button>
-                    <Button
-                      color="inherit"
-                      onClick={() => {
-                        window.location = '/govt_login'
-                      }}
-                    >
-                      Government Login
-                    </Button>
-                  </div>
-                )}
-                {this.state.authenticated == true && (
-                  <div>
-                    {' '}
-                    <Button
-                      color="inherit"
-                      onClick={() => {
-                        window.location = '/dashboard'
-                      }}
-                    >
-                      Dashboard
-                    </Button>
-                    <Button
-                      color="inherit"
-                      onClick={() => {
-                        window.location = '/profile'
-                      }}
-                    >
-                      Profile
-                    </Button>
-                    <Button
-                      color="inherit"
-                      onClick={() => {
-                        window.localStorage.setItem('authenticated', false)
-                        window.location = '/login'
-                      }}
-                    >
-                      Logout
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div className={classes.sectionMobile}>
-                <IconButton
-                  aria-label="show more"
-                  aria-controls={mobileMenuId}
-                  aria-haspopup="true"
-                  onClick={this.handleMobileMenuOpen}
-                  color="inherit"
+          {isAuthenticated ? (
+            <>
+              {authMenuItems.map((item) => (
+                <ListItem
+                  key={item.path}
+                  button
+                  onClick={() => handleNavigation(item.path)}
+                  selected={isActive(item.path)}
                 >
-                  <MoreIcon />
-                </IconButton>
-              </div>
-            </Toolbar>
-          </AppBar> */}
-          {renderMobileMenu}
-          {/* {renderMenu} */}
-        </div>
-      </div>
-    );
-  }
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.label} />
+                </ListItem>
+              ))}
+
+              {user?.role === 'government' && govtMenuItems.map((item) => (
+                <ListItem
+                  key={item.path}
+                  button
+                  onClick={() => handleNavigation(item.path)}
+                  selected={isActive(item.path)}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.label} />
+                </ListItem>
+              ))}
+
+              <ListItem button onClick={handleLogout}>
+                <ListItemIcon>
+                  <ExitToApp />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItem>
+            </>
+          ) : (
+            <>
+              <ListItem button onClick={() => handleNavigation('/login')}>
+                <ListItemIcon>
+                  <Login />
+                </ListItemIcon>
+                <ListItemText primary="Login" />
+              </ListItem>
+              <ListItem button onClick={() => handleNavigation('/signup')}>
+                <ListItemIcon>
+                  <PersonAdd />
+                </ListItemIcon>
+                <ListItemText primary="Sign Up" />
+              </ListItem>
+            </>
+          )}
+        </List>
+      </Box>
+    </Drawer>
+  );
+
+  return (
+    <>
+      <AppBar position="static" style={{ backgroundColor: '#328888' }}>
+        <Toolbar>
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{ flexGrow: 1, cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
+            🏠 Ardhi Registries
+          </Typography>
+
+          {isMobile ? (
+            <IconButton
+              color="inherit"
+              onClick={() => setMobileMenuOpen(true)}
+              edge="end"
+            >
+              <MenuIcon />
+            </IconButton>
+          ) : (
+            renderDesktopMenu()
+          )}
+        </Toolbar>
+      </AppBar>
+
+      {isMobile && renderMobileMenu()}
+    </>
+  );
 }
 
-export default withStyles(styles)(Header);
+export default Header;

@@ -1,147 +1,180 @@
-import React, { Component } from 'react';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import { Container } from '@material-ui/core';
-import SendIcon from '@material-ui/icons/Send';
-import { withRouter } from 'react-router-dom';
-import Land from '../abis/LandRegistry.json';
-import { withStyles } from '@material-ui/core/styles';
+import React, { useState, useEffect } from "react";
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Alert,
+  CircularProgress,
+  Paper,
+  Grid,
+  FormControlLabel,
+  Checkbox,
+} from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../App";
+import axios from "axios";
 
-const styles = () => ({
-  root: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%,-50%)',
-    '& .MuiFormLabel-root': {
-      color: '#fff',
-    },
-    '& .MuiInputBase-root': {
-      color: '#fff',
-    },
-    '& .MuiInput-underline:before': {
-      borderBottomColor: '#fff',
-    },
-    '& .MuiInput-underline:after': {
-      borderBottomColor: '#fff',
-    },
-    '& .MuiInput-underline:hover': {
-      borderBottomColor: '#fff',
-    },
-    '& .MuiButton-containedPrimary': {
-      backgroundColor: '#328888',
-      fontFamily: "'Roboto Condensed', sans-serif",
-    },
-  },
-});
+function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
-class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      address: '',
-      authenticated: false,
-      account: null,
-      landList: null,
-    };
-  }
-
-  componentDidMount = async () => {
-    const web3 = window.web3;
-    const accounts = await web3.eth.getAccounts();
-    await window.localStorage.setItem('web3account', accounts[0]);
-    this.setState({ account: accounts[0] });
-
-    const networkId = await web3.eth.net.getId();
-    const LandData = Land.networks[networkId];
-    if (LandData) {
-      const landList = new web3.eth.Contract(Land.abi, LandData.address);
-      this.setState({ landList });
-    } else {
-      window.alert('Token contract not deployed to detected network.');
-    }
-
-    if (window.localStorage.getItem('authenticated') === 'true') {
-      window.location = '/dashboard';
-    }
+  const handleChange = (field) => (event) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+    setError("");
   };
 
-  handleChange = (name) => (event) => {
-    this.setState({ [name]: event.target.value });
+  const validateForm = () => {
+    const { email, password } = formData;
+    
+    if (!email || !password) {
+      setError("Email and password are required");
+      return false;
+    }
+    
+    const emailRegex = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    
+    return true;
   };
 
-  handleSubmit = async () => {
-    let data = {
-      address: this.state.address,
-    };
-    if (this.state.address) {
-      try {
-        const user = await this.state.landList.methods
-          .getUser(data.address)
-          .call();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setLoading(true);
+    setError("");
 
-        if (user && user.exist) {
-          window.localStorage.setItem('authenticated', 'true');
-          window.location = '/dashboard';
-        } else {
-          console.log('Login Failed');
-          window.localStorage.setItem('authenticated', 'false');
-          this.props.history.push('/login');
-        }
-      } catch (error) {
-        console.log('Error:', error);
+    try {
+      const response = await axios.post("http://localhost:3001/api/login", formData);
+
+      if (response.data.success) {
+        login(response.data.user, response.data.token);
+        navigate("/dashboard");
       }
-    } else {
-      alert('All fields are required');
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Login failed. Please try again later.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  render() {
-    const { classes } = this.props;
-    return (
-      <div className="profile-bg">
-        <Container style={{ marginTop: '40px' }} className={classes.root}>
-          <div className="login-text">User Login</div>
-          <div className="input">
-            <TextField
-              id="standard-full-width"
-              type="address"
-              label="Ethereum Address"
-              placeholder="Enter your Ethereum Address"
-              fullWidth
-              value={this.state.address}
-              margin="normal"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              onChange={this.handleChange('address')}
-            />
-          </div>
+  return (
+    <div className="profile-bg">
+      <Container maxWidth="sm" style={{ marginTop: "40px", padding: "20px" }}>
+        <Paper elevation={3} style={{ padding: "40px", backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
+          <Typography variant="h4" component="h1" align="center" gutterBottom>
+            Login
+          </Typography>
+          
+          {error && (
+            <Alert severity="error" style={{ marginBottom: "20px" }}>
+              {error}
+            </Alert>
+          )}
 
-          <div>
-            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email Address"
+                  placeholder="Enter Your Email Address"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange("email")}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Password"
+                  placeholder="Enter Your Password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange("password")}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      color="primary"
+                    />
+                  }
+                  label="Remember me"
+                />
+              </Grid>
+            </Grid>
+
+            <Box display="flex" justifyContent="center" marginTop="30px">
               <Button
+                type="submit"
                 variant="contained"
                 color="primary"
-                endIcon={<SendIcon />}
-                onClick={this.handleSubmit}
+                size="large"
+                disabled={loading}
+                style={{ minWidth: "120px" }}
               >
-                Login
+                {loading ? <CircularProgress size={20} /> : "Login"}
               </Button>
-            </div>
-          </div>
-          <div
-            style={{ marginTop: '20px', textAlign: 'center', color: '#fff' }}
-          >
-            Don't have an account?{' '}
-            <a href="/signup" style={{ color: '#328888' }}>
-              Sign Up
-            </a>
-          </div>
-        </Container>
-      </div>
-    );
-  }
+            </Box>
+          </form>
+
+          <Box textAlign="center" marginTop="20px">
+            <Typography variant="body2">
+              Don't have an account?{" "}
+              <Button 
+                color="primary" 
+                onClick={() => navigate("/signup")}
+                style={{ textTransform: "none" }}
+              >
+                Sign up here
+              </Button>
+            </Typography>
+          </Box>
+
+          <Box textAlign="center" marginTop="10px">
+            <Button 
+              color="secondary" 
+              onClick={() => navigate("/govt_login")}
+              style={{ textTransform: "none" }}
+            >
+              Government Login
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    </div>
+  );
 }
 
-export default withStyles(styles)(Login);
+export default Login;

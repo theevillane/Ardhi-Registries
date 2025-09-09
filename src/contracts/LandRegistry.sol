@@ -1,236 +1,277 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-contract LandRegistry {
-    struct Task {
-        uint256 id;
-        string content;
-        bool completed;
-    }
-    struct user {
-        address userid;
-        string uname;
-        uint256 ucontact;
-        string uemail;
-        uint256 upostalCode;
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+
+contract LandRegistry is Ownable, ReentrancyGuard, Pausable {
+    struct User {
+        address userAddress;
+        string name;
+        string contact;
+        string email;
+        string postalCode;
         string city;
-        bool exist;
-    }
-    struct landDetails {
-        address payable id;
-        string ipfsHash;
-        string laddress;
-        uint256 lamount;
-        uint256 key;
-        string isGovtApproved;
-        string isAvailable;
-        address requester;
-        reqStatus requestStatus;
+        bool exists;
+        uint256 registrationTime;
     }
 
-    address[] userarr;
-    uint256[] assets;
-    address owner;
-    enum reqStatus {
+    struct LandDetails {
+        address payable owner;
+        string ipfsHash;
+        string landAddress;
+        uint256 price;
+        uint256 landId;
+        string governmentApproval;
+        string availability;
+        address requester;
+        RequestStatus requestStatus;
+        uint256 registrationTime;
+        bool exists;
+    }
+
+    struct Profiles {
+        uint256[] assetList;
+    }
+
+    enum RequestStatus {
         Default,
         Pending,
         Rejected,
         Approved
     }
 
-    constructor() public {
-        owner = msg.sender;
+    // State variables
+    address[] public userAddresses;
+    uint256[] public landAssets;
+    uint256 public landCounter;
+    
+    // Mappings
+    mapping(address => User) public users;
+    mapping(uint256 => LandDetails) public lands;
+    mapping(address => Profiles) public userProfiles;
+    mapping(address => bool) public governmentOfficials;
+
+    // Events
+    event UserRegistered(address indexed userAddress, string name, string email);
+    event LandRegistered(uint256 indexed landId, address indexed owner, string landAddress);
+    event LandRequested(uint256 indexed landId, address indexed requester);
+    event LandApproved(uint256 indexed landId, address indexed owner);
+    event LandRejected(uint256 indexed landId, address indexed owner);
+    event LandSold(uint256 indexed landId, address indexed from, address indexed to, uint256 price);
+
+    // Modifiers
+    modifier onlyRegisteredUser() {
+        require(users[msg.sender].exists, "User not registered");
+        _;
     }
 
-    struct profiles {
-        uint256[] assetList;
+    modifier onlyGovernmentOfficial() {
+        require(governmentOfficials[msg.sender], "Not authorized government official");
+        _;
     }
 
-    mapping(address => profiles) profile;
-
-    mapping(address => user) public users;
-    mapping(uint256 => landDetails) public land;
-
-    function addUser(
-        address uid,
-        string memory _uname,
-        uint256 _ucontact,
-        string memory _uemail,
-        uint256 _ucode,
-        string memory _ucity
-    ) public returns (bool) {
-        users[uid] = user(
-            uid,
-            _uname,
-            _ucontact,
-            _uemail,
-            _ucode,
-            _ucity,
-            true
-        );
-        userarr.push(uid);
-        return true;
+    modifier landExists(uint256 _landId) {
+        require(lands[_landId].exists, "Land does not exist");
+        _;
     }
 
-    function getUser(
-        address uid
-    )
-        public
-        view
-        returns (
-            address,
-            string memory,
-            uint256,
-            string memory,
-            uint256,
-            string memory,
-            bool
-        )
-    {
-        if (users[uid].exist)
-            return (
-                users[uid].userid,
-                users[uid].uname,
-                users[uid].ucontact,
-                users[uid].uemail,
-                users[uid].upostalCode,
-                users[uid].city,
-                users[uid].exist
-            );
+    constructor() {
+        landCounter = 0;
     }
 
-    function Registration(
-        address payable _id,
+    // Government functions
+    function addGovernmentOfficial(address _official) external onlyOwner {
+        governmentOfficials[_official] = true;
+    }
+
+    function removeGovernmentOfficial(address _official) external onlyOwner {
+        governmentOfficials[_official] = false;
+    }
+
+    // User registration
+    function registerUser(
+        string memory _name,
+        string memory _contact,
+        string memory _email,
+        string memory _postalCode,
+        string memory _city
+    ) external whenNotPaused {
+        require(!users[msg.sender].exists, "User already registered");
+        require(bytes(_name).length > 0, "Name cannot be empty");
+        require(bytes(_email).length > 0, "Email cannot be empty");
+        
+        users[msg.sender] = User({
+            userAddress: msg.sender,
+            name: _name,
+            contact: _contact,
+            email: _email,
+            postalCode: _postalCode,
+            city: _city,
+            exists: true,
+            registrationTime: block.timestamp
+        });
+        
+        userAddresses.push(msg.sender);
+        emit UserRegistered(msg.sender, _name, _email);
+    }
+
+    function getUser(address _userAddress) external view returns (User memory) {
+        require(users[_userAddress].exists, "User does not exist");
+        return users[_userAddress];
+    }
+
+    // Land registration
+    function registerLand(
         string memory _ipfsHash,
-        string memory _laddress,
-        uint256 _lamount,
-        uint256 _key,
-        string memory status,
-        string memory _isAvailable
-    ) public returns (bool) {
-        land[_key] = landDetails(
-            _id,
-            _ipfsHash,
-            _laddress,
-            _lamount,
-            _key,
-            status,
-            _isAvailable,
-            0x0000000000000000000000000000000000000000,
-            reqStatus.Default
-        );
-        profile[_id].assetList.push(_key);
-        assets.push(_key);
-        return true;
+        string memory _landAddress,
+        uint256 _price
+    ) external onlyRegisteredUser whenNotPaused returns (uint256) {
+        require(bytes(_ipfsHash).length > 0, "IPFS hash cannot be empty");
+        require(bytes(_landAddress).length > 0, "Land address cannot be empty");
+        require(_price > 0, "Price must be greater than 0");
+        
+        uint256 landId = landCounter;
+        landCounter++;
+        
+        lands[landId] = LandDetails({
+            owner: payable(msg.sender),
+            ipfsHash: _ipfsHash,
+            landAddress: _landAddress,
+            price: _price,
+            landId: landId,
+            governmentApproval: "Pending",
+            availability: "Not Available",
+            requester: address(0),
+            requestStatus: RequestStatus.Default,
+            registrationTime: block.timestamp,
+            exists: true
+        });
+        
+        userProfiles[msg.sender].assetList.push(landId);
+        landAssets.push(landId);
+        
+        emit LandRegistered(landId, msg.sender, _landAddress);
+        return landId;
     }
 
-    function computeId(
-        string memory _laddress,
-        string memory _lamount
-    ) public pure returns (uint256) {
-        return
-            uint256(keccak256(abi.encodePacked(_laddress, _lamount))) %
-            10000000000000;
+    function getLandDetails(uint256 _landId) external view landExists(_landId) returns (LandDetails memory) {
+        return lands[_landId];
     }
 
-    function viewAssets() public view returns (uint256[] memory) {
-        return (profile[msg.sender].assetList);
+    function getUserAssets(address _userAddress) external view returns (uint256[] memory) {
+        return userProfiles[_userAddress].assetList;
     }
 
-    function Assets() public view returns (uint256[] memory) {
-        return assets;
+    function getAllLands() external view returns (uint256[] memory) {
+        return landAssets;
     }
 
-    function landInfoOwner(
-        uint256 id
-    )
-        public
-        view
-        returns (
-            address payable,
-            string memory,
-            uint256,
-            string memory,
-            string memory,
-            address,
-            reqStatus
-        )
+    // Government approval functions
+    function approveLand(uint256 _landId, string memory _approvalStatus) 
+        external 
+        onlyGovernmentOfficial 
+        landExists(_landId) 
+        whenNotPaused 
     {
-        return (
-            land[id].id,
-            land[id].ipfsHash,
-            land[id].lamount,
-            land[id].isGovtApproved,
-            land[id].isAvailable,
-            land[id].requester,
-            land[id].requestStatus
-        );
-    }
-
-    function govtStatus(
-        uint256 _id,
-        string memory status,
-        string memory _isAvailable
-    ) public returns (bool) {
-        land[_id].isGovtApproved = status;
-        land[_id].isAvailable = _isAvailable;
-        return true;
-    }
-
-    function makeAvailable(uint256 property) public {
-        require(land[property].id == msg.sender);
-        land[property].isAvailable = "Available";
-    }
-
-    function requstToLandOwner(uint256 id) public {
-        land[id].requester = msg.sender;
-        land[id].isAvailable = "Pending";
-        land[id].requestStatus = reqStatus.Pending;
-    }
-
-    function processRequest(uint256 property, reqStatus status) public {
-        require(land[property].id == msg.sender);
-        land[property].requestStatus = status;
-        land[property].isAvailable = "Approved";
-        if (status == reqStatus.Rejected) {
-            land[property].requester = address(0);
-            land[property].requestStatus = reqStatus.Default;
-            land[property].isAvailable = "Available";
+        lands[_landId].governmentApproval = _approvalStatus;
+        if (keccak256(bytes(_approvalStatus)) == keccak256(bytes("Approved"))) {
+            lands[_landId].availability = "Available";
+            emit LandApproved(_landId, lands[_landId].owner);
+        } else {
+            lands[_landId].availability = "Not Available";
+            emit LandRejected(_landId, lands[_landId].owner);
         }
     }
 
-    function buyProperty(uint256 property) public payable {
-        require(land[property].requestStatus == reqStatus.Approved);
-        require(msg.value == (land[property].lamount * 1000000000000000000));
-        land[property].id.transfer(
-            land[property].lamount * 1000000000000000000
-        );
-        removeOwnership(land[property].id, property);
-        land[property].id = msg.sender;
-        land[property].isGovtApproved = "Not Approved";
-        land[property].isAvailable = "Not yet approved by the govt.";
-        land[property].requester = address(0);
-        land[property].requestStatus = reqStatus.Default;
-        profile[msg.sender].assetList.push(property);
+    // Land request and purchase functions
+    function requestLand(uint256 _landId) external onlyRegisteredUser landExists(_landId) whenNotPaused {
+        require(lands[_landId].owner != msg.sender, "Cannot request your own land");
+        require(keccak256(bytes(lands[_landId].governmentApproval)) == keccak256(bytes("Approved")), "Land not approved by government");
+        require(keccak256(bytes(lands[_landId].availability)) == keccak256(bytes("Available")), "Land not available");
+        
+        lands[_landId].requester = msg.sender;
+        lands[_landId].availability = "Requested";
+        lands[_landId].requestStatus = RequestStatus.Pending;
+        
+        emit LandRequested(_landId, msg.sender);
     }
 
-    function removeOwnership(address previousOwner, uint256 id) private {
-        uint256 index = findId(id, previousOwner);
-        profile[previousOwner].assetList[index] = profile[previousOwner]
-            .assetList[profile[previousOwner].assetList.length - 1];
-        delete profile[previousOwner].assetList[
-            profile[previousOwner].assetList.length - 1
-        ];
-        profile[previousOwner].assetList.length--;
-    }
-
-    function findId(
-        uint256 id,
-        address userAddress
-    ) public view returns (uint256) {
-        uint256 i;
-        for (i = 0; i < profile[userAddress].assetList.length; i++) {
-            if (profile[userAddress].assetList[i] == id) return i;
+    function processLandRequest(uint256 _landId, RequestStatus _status) 
+        external 
+        landExists(_landId) 
+        whenNotPaused 
+    {
+        require(lands[_landId].owner == msg.sender, "Only land owner can process requests");
+        require(lands[_landId].requestStatus == RequestStatus.Pending, "No pending request");
+        
+        lands[_landId].requestStatus = _status;
+        
+        if (_status == RequestStatus.Approved) {
+            lands[_landId].availability = "Approved for Purchase";
+        } else {
+            lands[_landId].availability = "Available";
+            lands[_landId].requester = address(0);
         }
-        return i;
+    }
+
+    function purchaseLand(uint256 _landId) 
+        external 
+        payable 
+        onlyRegisteredUser 
+        landExists(_landId) 
+        nonReentrant 
+        whenNotPaused 
+    {
+        require(lands[_landId].requestStatus == RequestStatus.Approved, "Request not approved");
+        require(lands[_landId].requester == msg.sender, "Not the approved requester");
+        require(msg.value == lands[_landId].price, "Incorrect payment amount");
+        
+        address previousOwner = lands[_landId].owner;
+        uint256 price = lands[_landId].price;
+        
+        // Transfer ownership
+        _removeOwnership(previousOwner, _landId);
+        lands[_landId].owner = payable(msg.sender);
+        lands[_landId].requester = address(0);
+        lands[_landId].requestStatus = RequestStatus.Default;
+        lands[_landId].governmentApproval = "Pending";
+        lands[_landId].availability = "Not Available";
+        userProfiles[msg.sender].assetList.push(_landId);
+        
+        // Transfer payment
+        (bool success, ) = previousOwner.call{value: price}("");
+        require(success, "Payment transfer failed");
+        
+        emit LandSold(_landId, previousOwner, msg.sender, price);
+    }
+
+    function _removeOwnership(address _previousOwner, uint256 _landId) private {
+        uint256[] storage assets = userProfiles[_previousOwner].assetList;
+        for (uint256 i = 0; i < assets.length; i++) {
+            if (assets[i] == _landId) {
+                assets[i] = assets[assets.length - 1];
+                assets.pop();
+                break;
+            }
+        }
+    }
+
+    // Utility functions
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+    }
+
+    function getLandCount() external view returns (uint256) {
+        return landCounter;
+    }
+
+    function getUserCount() external view returns (uint256) {
+        return userAddresses.length;
     }
 }
