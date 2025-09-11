@@ -5,7 +5,6 @@ import {
   Container,
   Typography,
   Box,
-  Alert,
   CircularProgress,
   Card,
   CardContent,
@@ -101,9 +100,16 @@ function Login() {
             </Box>
             
             {error && (
-              <Alert severity="error" style={{ marginBottom: "20px" }}>
+              <div style={{ 
+                marginBottom: "20px", 
+                padding: "12px", 
+                backgroundColor: "#ffebee", 
+                color: "#c62828", 
+                border: "1px solid #ef5350", 
+                borderRadius: "4px" 
+              }}>
                 {error}
-              </Alert>
+              </div>
             )}
 
             <form onSubmit={handleSubmit}>

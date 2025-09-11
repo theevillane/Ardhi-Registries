@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button'
 import { Container, Typography } from '@material-ui/core'
 import SendIcon from '@material-ui/icons/Send'
 import axios from 'axios'
-import { withRouter, Redirect } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import Land from '../abis/LandRegistry.json'
 import profile from '../images/avatar.png'
 import LocationOnIcon from '@material-ui/icons/LocationOn'
@@ -13,6 +13,12 @@ import MailIcon from '@material-ui/icons/Mail'
 import PhoneIcon from '@material-ui/icons/Phone'
 import VpnKeyIcon from '@material-ui/icons/VpnKey'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
+
+// Create a wrapper component to use hooks in a class component
+const ProfileWithRouter = (props) => {
+  const navigate = useNavigate();
+  return <Login {...props} navigate={navigate} />;
+};
 
 class Login extends Component {
   constructor(props) {
@@ -44,7 +50,7 @@ class Login extends Component {
       !window.localStorage.getItem('authenticated') ||
       window.localStorage.getItem('authenticated') === 'false'
     )
-      this.props.history.push('/login')
+      this.props.navigate('/login')
 
     const user = await this.state.landList.methods.getUser(accounts[0]).call()
     this.setState({
@@ -110,4 +116,4 @@ class Login extends Component {
     )
   }
 }
-export default Login
+export default ProfileWithRouter

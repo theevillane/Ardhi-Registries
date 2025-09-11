@@ -28,7 +28,7 @@ import {
   AdminPanelSettings,
 } from '@material-ui/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../App';
+import { useAuth } from '../contexts/AuthContext';
 
 function Header() {
   const navigate = useNavigate();

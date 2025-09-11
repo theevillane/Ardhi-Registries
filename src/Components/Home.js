@@ -2,13 +2,19 @@ import React, { Component } from "react";
 import Typewriter from "react-typewriter-effect";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import { withRouter } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom";
+
+// Create a wrapper component to use hooks in a class component
+const HomeWithRouter = (props) => {
+  const navigate = useNavigate();
+  return <Home {...props} navigate={navigate} />;
+};
 
 class Home extends Component {
   constructor(props) {
     super(props);
-    // Add console log to check if history is available
-    console.log("History available:", !!this.props.history);
+    // Add console log to check if navigate is available
+    console.log("Navigate available:", !!this.props.navigate);
   }
 
   // Add explicit handler methods with error catching
@@ -16,7 +22,7 @@ class Home extends Component {
     e.preventDefault(); // Prevent any default behavior
     console.log("Register button clicked");
     try {
-      this.props.history.push("/signup");
+      this.props.navigate("/signup");
     } catch (error) {
       console.error("Navigation error:", error);
       // Fallback navigation method
@@ -28,7 +34,7 @@ class Home extends Component {
     e.preventDefault(); // Prevent any default behavior
     console.log("Login button clicked");
     try {
-      this.props.history.push("/login");
+      this.props.navigate("/login");
     } catch (error) {
       console.error("Navigation error:", error);
       // Fallback navigation method
@@ -87,5 +93,5 @@ class Home extends Component {
   }
 }
 
-// Export with Router HOC
-export default withRouter(Home);
+// Export with Router wrapper
+export default HomeWithRouter;

@@ -25213,10 +25213,582 @@
       "links": {},
       "address": "0x183160156fdFc23D327f618A84cb6ed48e043235",
       "transactionHash": "0x2e4cb1fe947a14b88aba3edd9adea7334e9b267c61744de154ab293372baad8a"
+    },
+    "1757579705839": {
+      "events": {
+        "0x81990fd9a5c552b8e3677917d8a03c07678f0d2cb68f88b634aca2022e9bd19f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "by",
+              "type": "address"
+            }
+          ],
+          "name": "ContractPaused",
+          "type": "event"
+        },
+        "0x5b65b0c1363b3003db9bcc5e1fd8805a6d6bf5bf6dc9d3431ee4494cd7d11766": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "by",
+              "type": "address"
+            }
+          ],
+          "name": "ContractUnpaused",
+          "type": "event"
+        },
+        "0xacfa9b24760e34ca533e28b821ebae7994d05ed195781892fd054f15321cfea5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "official",
+              "type": "address"
+            }
+          ],
+          "name": "GovernmentOfficialAdded",
+          "type": "event"
+        },
+        "0x7fa841629ce957672b096dcc2d095fae8c1d20dd7d1292ce1f9789f0a8d1e19c": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "official",
+              "type": "address"
+            }
+          ],
+          "name": "GovernmentOfficialRemoved",
+          "type": "event"
+        },
+        "0x86e9aca6cb4ad62ef91751d2c0216c708524295fe973127e5ff6a58cfa49d462": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "enum LandRegistry.ApprovalStatus",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "LandApproved",
+          "type": "event"
+        },
+        "0x09f87bd638cbe9814396205461896d192bb615baa655b37f43ef8414a75b7fd5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "landAddress",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            }
+          ],
+          "name": "LandRegistered",
+          "type": "event"
+        },
+        "0x7c557f0ad60bff2708eadd0f87c51ff048f5779dd283cc4b208fae0a6c2eee3f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "LandRejected",
+          "type": "event"
+        },
+        "0x3479756a85e48b0413170ec62c7738cec0cd99ca916410d5f6cfe5653f27a8b5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "requester",
+              "type": "address"
+            }
+          ],
+          "name": "LandRequested",
+          "type": "event"
+        },
+        "0x2dcc677025acfeac3c6b0dedf2599864d3878a9041058fa9d55aa4e47409120a": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            }
+          ],
+          "name": "LandSold",
+          "type": "event"
+        },
+        "0x42728d0cb399d0ddf82e982cad2153f8c0f9848bc0884e5bbe2cf12bb6c70251": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "LandUpdated",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Paused",
+          "type": "event"
+        },
+        "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Unpaused",
+          "type": "event"
+        },
+        "0x5554feec4e87bc4eba14bd62f71df68156f97d26128616fbc27d28e33b35a6b4": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "userAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UserDeactivated",
+          "type": "event"
+        },
+        "0x92822564bab8864c3a47b34e8d23fbce5c46234eb5da261f94087b995ac0f33b": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "userAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "email",
+              "type": "string"
+            }
+          ],
+          "name": "UserRegistered",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x5a11eb4025B5443Bcc2EE2E861dc53d310FccFb4",
+      "transactionHash": "0x64977add0a4af2717ce63c7c5d2a0f83a5d0490a40a1fe6f263b78d143d9097e"
+    },
+    "1757579573590": {
+      "events": {
+        "0x81990fd9a5c552b8e3677917d8a03c07678f0d2cb68f88b634aca2022e9bd19f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "by",
+              "type": "address"
+            }
+          ],
+          "name": "ContractPaused",
+          "type": "event"
+        },
+        "0x5b65b0c1363b3003db9bcc5e1fd8805a6d6bf5bf6dc9d3431ee4494cd7d11766": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "by",
+              "type": "address"
+            }
+          ],
+          "name": "ContractUnpaused",
+          "type": "event"
+        },
+        "0xacfa9b24760e34ca533e28b821ebae7994d05ed195781892fd054f15321cfea5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "official",
+              "type": "address"
+            }
+          ],
+          "name": "GovernmentOfficialAdded",
+          "type": "event"
+        },
+        "0x7fa841629ce957672b096dcc2d095fae8c1d20dd7d1292ce1f9789f0a8d1e19c": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "official",
+              "type": "address"
+            }
+          ],
+          "name": "GovernmentOfficialRemoved",
+          "type": "event"
+        },
+        "0x86e9aca6cb4ad62ef91751d2c0216c708524295fe973127e5ff6a58cfa49d462": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "enum LandRegistry.ApprovalStatus",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "LandApproved",
+          "type": "event"
+        },
+        "0x09f87bd638cbe9814396205461896d192bb615baa655b37f43ef8414a75b7fd5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "landAddress",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            }
+          ],
+          "name": "LandRegistered",
+          "type": "event"
+        },
+        "0x7c557f0ad60bff2708eadd0f87c51ff048f5779dd283cc4b208fae0a6c2eee3f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "LandRejected",
+          "type": "event"
+        },
+        "0x3479756a85e48b0413170ec62c7738cec0cd99ca916410d5f6cfe5653f27a8b5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "requester",
+              "type": "address"
+            }
+          ],
+          "name": "LandRequested",
+          "type": "event"
+        },
+        "0x2dcc677025acfeac3c6b0dedf2599864d3878a9041058fa9d55aa4e47409120a": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            }
+          ],
+          "name": "LandSold",
+          "type": "event"
+        },
+        "0x42728d0cb399d0ddf82e982cad2153f8c0f9848bc0884e5bbe2cf12bb6c70251": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "landId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "LandUpdated",
+          "type": "event"
+        },
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Paused",
+          "type": "event"
+        },
+        "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Unpaused",
+          "type": "event"
+        },
+        "0x5554feec4e87bc4eba14bd62f71df68156f97d26128616fbc27d28e33b35a6b4": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "userAddress",
+              "type": "address"
+            }
+          ],
+          "name": "UserDeactivated",
+          "type": "event"
+        },
+        "0x92822564bab8864c3a47b34e8d23fbce5c46234eb5da261f94087b995ac0f33b": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "userAddress",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "email",
+              "type": "string"
+            }
+          ],
+          "name": "UserRegistered",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x2bf863f745d736f9e4a93b55fFfCb28b319d5daE",
+      "transactionHash": "0x7bff1b94c920e7fcd60318e19f68f1cd772bd448d0e6a91ad9a1ace1c3f0fe3c"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2025-09-13T11:08:58.235Z",
+  "updatedAt": "2025-09-11T08:35:45.032Z",
   "networkType": "ethereum",
   "devdoc": {
     "author": "Ardhi Registries Team",

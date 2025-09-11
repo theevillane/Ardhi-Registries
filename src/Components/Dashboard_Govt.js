@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { withRouter, Redirect } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { Button, Container, CircularProgress } from '@material-ui/core'
 import Land from '../abis/LandRegistry.json'
 import ipfs from '../ipfs'
@@ -17,6 +17,12 @@ const styles = (theme) => ({
     },
   },
 })
+
+// Create a wrapper component to use hooks in a class component
+const DashboardGovtWithRouter = (props) => {
+  const navigate = useNavigate();
+  return <Dashboard {...props} navigate={navigate} />;
+};
 
 class Dashboard extends Component {
   constructor(props) {
@@ -119,7 +125,7 @@ class Dashboard extends Component {
             style={{ marginTop: '30px' }}
             variant="contained"
             color="primary"
-            onClick={() => this.props.history.push('/registration_form')}
+            onClick={() => this.props.navigate('/registration_form')}
           >
             Register Land
           </Button> */}
@@ -132,4 +138,4 @@ class Dashboard extends Component {
     )
   }
 }
-export default withStyles(styles)(Dashboard)
+export default withStyles(styles)(DashboardGovtWithRouter)
