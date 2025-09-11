@@ -9,18 +9,26 @@ import {
   CircularProgress,
   Paper,
   Grid,
+  Card,
+  CardContent,
+  Divider,
 } from "@material-ui/core";
-import SendIcon from "@material-ui/icons/Send";
-import axios from "axios";
+import {
+  Person as PersonIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  AccountBalanceWallet as WalletIcon,
+  LocationOn as LocationIcon,
+  Send as SendIcon,
+} from "@material-ui/icons";
 import { useNavigate } from "react-router-dom";
-import { useWeb3 } from "../App";
-import { useAuth } from "../App";
-import Land from "../abis/LandRegistry.json";
+import { useWeb3 } from "../contexts/Web3Context";
+import { useAuth } from "../contexts/AuthContext";
 
 function Register() {
   const navigate = useNavigate();
-  const { web3, account } = useWeb3();
-  const { login } = useAuth();
+  const { account, isConnected, connectWallet, isConnecting, error: web3Error } = useWeb3();
+  const { register } = useAuth();
   
   const [formData, setFormData] = useState({
     name: "",
@@ -72,6 +80,11 @@ function Register() {
       return false;
     }
     
+    if (!/^[\+]?[1-9][\d]{0,15}$/.test(contact)) {
+      setError("Please enter a valid contact number");
+      return false;
+    }
+    
     return true;
   };
 
@@ -80,62 +93,32 @@ function Register() {
     
     if (!validateForm()) return;
     
+    if (!isConnected) {
+      setError("Please connect your wallet first");
+      return;
+    }
+    
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      // Register user in database
-      const response = await axios.post("http://localhost:3001/api/signup", {
+      const result = await register({
         ...formData,
         walletAddress: formData.address
       });
 
-      if (response.data.success) {
-        // Register user on blockchain
-        if (web3) {
-          const networkId = await web3.eth.net.getId();
-          const LandData = Land.networks[networkId];
-          
-          if (LandData) {
-            const landContract = new web3.eth.Contract(Land.abi, LandData.address);
-            
-            await landContract.methods
-              .registerUser(
-                formData.address,
-                formData.name,
-                formData.contact,
-                formData.email,
-                formData.postalCode,
-                formData.city
-              )
-              .send({ from: account, gas: 1000000 })
-              .on("receipt", (receipt) => {
-                console.log("User registered on blockchain:", receipt);
-                setSuccess("Registration successful! You can now login.");
-                
-                // Auto-login after successful registration
-                login(response.data.user, response.data.token);
-                navigate("/dashboard");
-              })
-              .on("error", (error) => {
-                console.error("Blockchain registration error:", error);
-                setError("Database registration successful, but blockchain registration failed. Please try again.");
-              });
-          } else {
-            setError("Smart contract not deployed to detected network");
-          }
-        } else {
-          setError("Web3 not available. Please install MetaMask.");
-        }
+      if (result.success) {
+        setSuccess("Registration successful! Redirecting to dashboard...");
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      } else {
+        setError(result.message);
       }
     } catch (error) {
       console.error("Registration error:", error);
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Registration failed. Please try again later.");
-      }
+      setError("Registration failed. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -143,122 +126,172 @@ function Register() {
 
   return (
     <div className="profile-bg">
-      <Container maxWidth="sm" style={{ marginTop: "40px", padding: "20px" }}>
-        <Paper elevation={3} style={{ padding: "40px", backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom>
-            Register Here
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" style={{ marginBottom: "20px" }}>
-              {error}
-            </Alert>
-          )}
-          
-          {success && (
-            <Alert severity="success" style={{ marginBottom: "20px" }}>
-              {success}
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Name"
-                  placeholder="Enter Your Name"
-                  value={formData.name}
-                  onChange={handleChange("name")}
-                  required
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Email Address"
-                  placeholder="Enter Your Email Address"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange("email")}
-                  required
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Contact Number"
-                  placeholder="Enter Your Contact Number"
-                  value={formData.contact}
-                  onChange={handleChange("contact")}
-                  required
-                />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Ethereum Address"
-                  placeholder="Enter Your Ethereum Address"
-                  value={formData.address}
-                  onChange={handleChange("address")}
-                  required
-                  helperText={account ? "Connected wallet address" : "Please connect your wallet"}
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="City"
-                  placeholder="Enter Your City"
-                  value={formData.city}
-                  onChange={handleChange("city")}
-                  required
-                />
-              </Grid>
-              
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Postal Code"
-                  placeholder="Enter Your Postal Code"
-                  value={formData.postalCode}
-                  onChange={handleChange("postalCode")}
-                  required
-                />
-              </Grid>
-            </Grid>
-
-            <Box display="flex" justifyContent="center" marginTop="30px">
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                size="large"
-                endIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
-                disabled={loading || !account}
-              >
-                {loading ? "Registering..." : "Sign Up"}
-              </Button>
+      <Container maxWidth="md" style={{ marginTop: "40px", padding: "20px" }}>
+        <Card elevation={3} style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
+          <CardContent style={{ padding: "40px" }}>
+            <Box textAlign="center" marginBottom="30px">
+              <Typography variant="h4" component="h1" gutterBottom style={{ fontWeight: 600 }}>
+                Create Your Account
+              </Typography>
+              <Typography variant="body1" color="textSecondary">
+                Join the decentralized land registry system
+              </Typography>
             </Box>
-          </form>
+            
+            {error && (
+              <Alert severity="error" style={{ marginBottom: "20px" }}>
+                {error}
+              </Alert>
+            )}
+            
+            {success && (
+              <Alert severity="success" style={{ marginBottom: "20px" }}>
+                {success}
+              </Alert>
+            )}
 
-          <Box textAlign="center" marginTop="20px">
-            <Typography variant="body2">
-              Already have an account?{" "}
-              <Button 
-                color="primary" 
-                onClick={() => navigate("/login")}
-                style={{ textTransform: "none" }}
-              >
-                Login here
-              </Button>
-            </Typography>
-          </Box>
-        </Paper>
+            {web3Error && (
+              <Alert severity="warning" style={{ marginBottom: "20px" }}>
+                {web3Error}
+              </Alert>
+            )}
+
+            {!isConnected && (
+              <Box textAlign="center" marginBottom="20px">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={connectWallet}
+                  disabled={isConnecting}
+                  startIcon={isConnecting ? <CircularProgress size={20} /> : <WalletIcon />}
+                  size="large"
+                >
+                  {isConnecting ? "Connecting..." : "Connect Wallet"}
+                </Button>
+                <Typography variant="body2" color="textSecondary" style={{ marginTop: "10px" }}>
+                  Please connect your MetaMask wallet to continue
+                </Typography>
+              </Box>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Full Name"
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={handleChange("name")}
+                    required
+                    InputProps={{
+                      startAdornment: <PersonIcon style={{ marginRight: "10px", color: "#666" }} />
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Email Address"
+                    placeholder="Enter your email address"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange("email")}
+                    required
+                    InputProps={{
+                      startAdornment: <EmailIcon style={{ marginRight: "10px", color: "#666" }} />
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Contact Number"
+                    placeholder="Enter your contact number"
+                    value={formData.contact}
+                    onChange={handleChange("contact")}
+                    required
+                    InputProps={{
+                      startAdornment: <PhoneIcon style={{ marginRight: "10px", color: "#666" }} />
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Ethereum Wallet Address"
+                    placeholder="Your wallet address will appear here"
+                    value={formData.address}
+                    onChange={handleChange("address")}
+                    required
+                    disabled={isConnected}
+                    helperText={isConnected ? "Connected wallet address" : "Connect your wallet to auto-fill"}
+                    InputProps={{
+                      startAdornment: <WalletIcon style={{ marginRight: "10px", color: "#666" }} />
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="City"
+                    placeholder="Enter your city"
+                    value={formData.city}
+                    onChange={handleChange("city")}
+                    required
+                    InputProps={{
+                      startAdornment: <LocationIcon style={{ marginRight: "10px", color: "#666" }} />
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Postal Code"
+                    placeholder="Enter your postal code"
+                    value={formData.postalCode}
+                    onChange={handleChange("postalCode")}
+                    required
+                  />
+                </Grid>
+              </Grid>
+
+              <Divider style={{ margin: "30px 0" }} />
+
+              <Box display="flex" justifyContent="center" marginTop="20px">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  endIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
+                  disabled={loading || !isConnected}
+                  style={{ minWidth: "200px" }}
+                >
+                  {loading ? "Creating Account..." : "Create Account"}
+                </Button>
+              </Box>
+            </form>
+
+            <Box textAlign="center" marginTop="30px">
+              <Typography variant="body2" color="textSecondary">
+                Already have an account?{" "}
+                <Button 
+                  color="primary" 
+                  onClick={() => navigate("/login")}
+                  style={{ textTransform: "none", fontWeight: 600 }}
+                >
+                  Sign In
+                </Button>
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
       </Container>
     </div>
   );

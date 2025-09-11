@@ -9,6 +9,7 @@ const path = require("path");
 
 // Import routes
 const userRoutes = require("./backend/Controller/user");
+const landRoutes = require("./backend/Controller/land");
 const config = require("./backend/Config/db_config");
 
 const app = express();
@@ -60,6 +61,7 @@ mongoose
 
 // Routes
 app.use("/api", userRoutes);
+app.use("/api/land", landRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

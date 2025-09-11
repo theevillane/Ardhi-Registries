@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -7,14 +7,18 @@ import {
   Box,
   Alert,
   CircularProgress,
-  Paper,
-  Grid,
-  FormControlLabel,
-  Checkbox,
+  Card,
+  CardContent,
+  Divider,
+  Link,
 } from "@material-ui/core";
+import {
+  Email as EmailIcon,
+  Lock as LockIcon,
+  Login as LoginIcon,
+} from "@material-ui/icons";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../App";
-import axios from "axios";
+import { useAuth } from "../contexts/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
@@ -27,7 +31,6 @@ function Login() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
 
   const handleChange = (field) => (event) => {
     setFormData(prev => ({
@@ -63,19 +66,21 @@ function Login() {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:3001/api/login", formData);
+      const result = await login(formData.email, formData.password);
 
-      if (response.data.success) {
-        login(response.data.user, response.data.token);
-        navigate("/dashboard");
+      if (result.success) {
+        // Redirect based on user role
+        if (result.user.role === 'government') {
+          navigate("/dashboard_govt");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        setError(result.message);
       }
     } catch (error) {
       console.error("Login error:", error);
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else {
-        setError("Login failed. Please try again later.");
-      }
+      setError("Login failed. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -84,94 +89,100 @@ function Login() {
   return (
     <div className="profile-bg">
       <Container maxWidth="sm" style={{ marginTop: "40px", padding: "20px" }}>
-        <Paper elevation={3} style={{ padding: "40px", backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom>
-            Login
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" style={{ marginBottom: "20px" }}>
-              {error}
-            </Alert>
-          )}
+        <Card elevation={3} style={{ backgroundColor: "rgba(255, 255, 255, 0.95)" }}>
+          <CardContent style={{ padding: "40px" }}>
+            <Box textAlign="center" marginBottom="30px">
+              <Typography variant="h4" component="h1" gutterBottom style={{ fontWeight: 600 }}>
+                Welcome Back
+              </Typography>
+              <Typography variant="body1" color="textSecondary">
+                Sign in to your account
+              </Typography>
+            </Box>
+            
+            {error && (
+              <Alert severity="error" style={{ marginBottom: "20px" }}>
+                {error}
+              </Alert>
+            )}
 
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
+            <form onSubmit={handleSubmit}>
+              <Box marginBottom="20px">
                 <TextField
                   fullWidth
                   label="Email Address"
-                  placeholder="Enter Your Email Address"
+                  placeholder="Enter your email address"
                   type="email"
                   value={formData.email}
                   onChange={handleChange("email")}
                   required
+                  InputProps={{
+                    startAdornment: <EmailIcon style={{ marginRight: "10px", color: "#666" }} />
+                  }}
                 />
-              </Grid>
+              </Box>
               
-              <Grid item xs={12}>
+              <Box marginBottom="20px">
                 <TextField
                   fullWidth
                   label="Password"
-                  placeholder="Enter Your Password"
+                  placeholder="Enter your password"
                   type="password"
                   value={formData.password}
                   onChange={handleChange("password")}
                   required
+                  InputProps={{
+                    startAdornment: <LockIcon style={{ marginRight: "10px", color: "#666" }} />
+                  }}
                 />
-              </Grid>
-              
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label="Remember me"
-                />
-              </Grid>
-            </Grid>
+              </Box>
 
-            <Box display="flex" justifyContent="center" marginTop="30px">
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                size="large"
-                disabled={loading}
-                style={{ minWidth: "120px" }}
-              >
-                {loading ? <CircularProgress size={20} /> : "Login"}
-              </Button>
+              <Divider style={{ margin: "20px 0" }} />
+
+              <Box display="flex" justifyContent="center" marginTop="20px">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  endIcon={loading ? <CircularProgress size={20} /> : <LoginIcon />}
+                  disabled={loading}
+                  style={{ minWidth: "200px" }}
+                >
+                  {loading ? "Signing In..." : "Sign In"}
+                </Button>
+              </Box>
+            </form>
+
+            <Box textAlign="center" marginTop="30px">
+              <Typography variant="body2" color="textSecondary">
+                Don't have an account?{" "}
+                <Link 
+                  component="button"
+                  variant="body2"
+                  onClick={() => navigate("/signup")}
+                  style={{ textTransform: "none", fontWeight: 600 }}
+                >
+                  Create Account
+                </Link>
+              </Typography>
             </Box>
-          </form>
 
-          <Box textAlign="center" marginTop="20px">
-            <Typography variant="body2">
-              Don't have an account?{" "}
-              <Button 
-                color="primary" 
-                onClick={() => navigate("/signup")}
-                style={{ textTransform: "none" }}
-              >
-                Sign up here
-              </Button>
-            </Typography>
-          </Box>
-
-          <Box textAlign="center" marginTop="10px">
-            <Button 
-              color="secondary" 
-              onClick={() => navigate("/govt_login")}
-              style={{ textTransform: "none" }}
-            >
-              Government Login
-            </Button>
-          </Box>
-        </Paper>
+            <Box textAlign="center" marginTop="20px">
+              <Typography variant="body2" color="textSecondary">
+                Government Official?{" "}
+                <Link 
+                  component="button"
+                  variant="body2"
+                  onClick={() => navigate("/govt_login")}
+                  style={{ textTransform: "none", fontWeight: 600 }}
+                >
+                  Government Login
+                </Link>
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
       </Container>
     </div>
   );

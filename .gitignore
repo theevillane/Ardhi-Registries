@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+Server/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -14,8 +15,7 @@ yarn-error.log*
 # Build outputs
 build/
 dist/
-*.tgz
-*.tar.gz
+Server/build/
 
 # Logs
 logs/
@@ -26,7 +26,7 @@ yarn-error.log*
 lerna-debug.log*
 
 # Runtime data
-pids/
+pids
 *.pid
 *.seed
 *.pid.lock
@@ -39,7 +39,6 @@ coverage/
 .nyc_output
 
 # Dependency directories
-node_modules/
 jspm_packages/
 
 # Optional npm cache directory
@@ -47,6 +46,12 @@ jspm_packages/
 
 # Optional eslint cache
 .eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
 # Optional REPL history
 .node_repl_history
@@ -57,36 +62,30 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-.env.test
-
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
 
-# next.js build output
+# Next.js build output
 .next
 
-# nuxt.js build output
+# Nuxt.js build / generate output
 .nuxt
+dist
 
-# vuepress build output
-.vuepress/dist
+# Gatsby files
+.cache/
+public
 
-# Serverless directories
-.serverless/
+# Storybook build outputs
+.out
+.storybook-out
 
-# FuseBox cache
-.fusebox/
+# Temporary folders
+tmp/
+temp/
 
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# IDE files
+# Editor directories and files
 .vscode/
 .idea/
 *.swp
@@ -102,26 +101,59 @@ jspm_packages/
 ehthumbs.db
 Thumbs.db
 
-# Truffle build artifacts
+# Smart contract build artifacts
 src/abis/
 build/
+contracts/build/
 
-# Contract deployment artifacts
-migrations/
-*.json.bak
+# Truffle files
+.truffle/
 
-# Private keys and sensitive data
-*.key
-*.pem
-*.p12
-*.pfx
-secrets/
+# Hardhat files
+cache/
+artifacts/
 
-# Database files
+# IPFS
+.ipfs/
+
+# Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Temporary files
-tmp/
-temp/
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Test files
+test-results/
+coverage/
+
+# Deployment files
+deploy/
+deployment/
+
+# Local development
+.local/
+local/
+
+# Package manager lock files (uncomment if you want to ignore them)
+# package-lock.json
+# yarn.lock
+
+# IDE and editor files
+*.sublime-project
+*.sublime-workspace
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Application specific
+uploads/
+public/uploads/
