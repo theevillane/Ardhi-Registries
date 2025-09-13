@@ -3,7 +3,7 @@ const router = express.Router();
 const Land = require("../Model/Land");
 const User = require("../Model/User");
 const config = require("../Config/db_config");
-const Web3 = require('web3');
+const { Web3 } = require('web3');
 
 // Initialize Web3
 const web3 = new Web3(config.ETHEREUM_RPC_URL || 'http://localhost:7545');
