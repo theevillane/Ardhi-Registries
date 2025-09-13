@@ -10,7 +10,7 @@
 		"@material-ui/pickers": "^3.3.10",
 		"@openzeppelin/contracts": "^4.9.3",
 		"@testing-library/jest-dom": "^5.16.5",
-		"@testing-library/react": "^13.4.0",
+		"@testing-library/react": "^12.1.5",
 		"@testing-library/user-event": "^14.4.3",
 		"axios": "^1.4.0",
 		"bcryptjs": "^2.4.3",
